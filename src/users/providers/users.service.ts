@@ -27,17 +27,17 @@ export class UsersService {
     private readonly authService: AuthService,
   ) {}
 
-  public async createUser(createuserDto:CreateUserDto) {
-      const existingUser = await this.userRepository.findOne({
-        where: {
-          email: createuserDto.email,
-        }
-      })
+  public async createUser(createuserDto: CreateUserDto) {
+    const existingUser = await this.userRepository.findOne({
+      where: {
+        email: createuserDto.email,
+      },
+    });
 
-      let newUser = this.userRepository.create(createuserDto);
-      newUser = await this.userRepository.save(newUser);
+    let newUser = this.userRepository.create(createuserDto);
+    newUser = await this.userRepository.save(newUser);
 
-      return newUser
+    return newUser;
   }
 
   /**
@@ -66,9 +66,7 @@ export class UsersService {
     //   },
     // ];
 
-    const allUsersFromDB = await this.userRepository.find({
-
-    })
+    const allUsersFromDB = await this.userRepository.find({});
 
     return allUsersFromDB;
   }
@@ -76,15 +74,11 @@ export class UsersService {
   /**
    * Retrieves a single user by their ID.
    *
-   * @param {string} id - The unique identifier of the user.
-   * @returns {Object} An object containing user details.
+   * @param {number} id - The unique identifier of the user.
+   * @returns {User} An object containing user details.
    */
-  
-  public findSingleUserById(id: string): object {
-    return {
-      id: 1234,
-      firstName: 'Alice',
-      email: 'alice@inwonderland.com',
-    };
+
+  public async findSingleUserById(id: number): Promise<User> {
+    return await this.userRepository.findOneBy({ id });
   }
 }

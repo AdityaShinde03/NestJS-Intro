@@ -20,7 +20,7 @@ import { MetaOptionsModule } from './meta-options/meta-options.module';
       useFactory: () => ({
         type: 'postgres',
         host: 'localhost',
-        port: 5434,
+        port: 5432,
         username: 'postgres',
         password: 'Aditya@Super',
         database: 'nest-blog',

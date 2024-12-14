@@ -47,7 +47,7 @@ export class PostsController {
     description: 'You get a 201 response if your post is created successfully',
   })
   @Post()
-  public createPost(@Body() createPostDto: CreatePostDto): Promise<CreatePostDto> {
+  public createPost(@Body() createPostDto: CreatePostDto) {
     return this.postsService.create(createPostDto)
   }
 
@@ -67,8 +67,8 @@ export class PostsController {
     description: 'You get a 200 response if your post is updated successfully',
   })
   @Patch()
-  public updatePost(@Body() patchPostDto: PatchPostDto): void {
-    console.log(patchPostDto);
+  public updatePost(@Body() patchPostDto: PatchPostDto) {
+    return this.postsService.updatePostById(patchPostDto);
   }
 
   @Delete()

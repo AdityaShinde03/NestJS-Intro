@@ -2,6 +2,15 @@ PATCH http://localhost:3000/posts
 Content-Type: application/json
 
 {
-    "id": 1234,
-    "postType": "post"
+    "id": 9,
+    "title":"What's new and interesting with SwiftUI and IOS Development",
+    "postType":"post",
+    "status": "draft",
+    "content": "Testing Content For swiftUI",
+    "featuredImageUrl": "http://localhost.com/images/image1.jpg",
+    "metaOptions":
+        {
+            "metaValue":"{\"sidebarEnabled\": true, \"footerActive\": true}"
+        },
+    "tags": [1,2]
 }
