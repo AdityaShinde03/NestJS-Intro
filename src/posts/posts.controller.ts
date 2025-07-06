@@ -3,6 +3,7 @@ import { PostsService } from './providers/posts.service';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreatePostDto } from './dtos/create-post.dto';
 import { PatchPostDto } from './dtos/patch-post.dto';
+import { GetPostsDto } from './dtos/get-posts.dto';
 
 /**
  * Controller responsible for handling requests related to blog posts.
@@ -27,8 +28,8 @@ export class PostsController {
    * @returns {any} The blog posts associated with the given user ID.
    */
   @Get('/:userId?')
-  public getPostsByUserId(@Param('userId') userId: string): any {
-    return this.postsService.findAllPosts(userId);
+  public getPostsByUserId(@Param('userId') userId: string, @Query() postQuery: GetPostsDto): any {
+    return this.postsService.findAllPosts(postQuery,userId);
   }
 
   /**

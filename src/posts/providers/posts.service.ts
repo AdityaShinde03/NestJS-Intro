@@ -1,4 +1,9 @@
-import { Body, Injectable } from '@nestjs/common';
+import {
+  BadGatewayException,
+  Body,
+  Injectable,
+  RequestTimeoutException,
+} from '@nestjs/common';
 import { UsersService } from 'src/users/providers/users.service';
 import { CreatePostDto } from '../dtos/create-post.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -7,6 +12,9 @@ import { Post } from '../post.entity';
 import { MetaOption } from 'src/meta-options/meta-options.entity';
 import { TagsService } from 'src/tags/providers/tags.service';
 import { PatchPostDto } from '../dtos/patch-post.dto';
+import { GetPostsDto } from '../dtos/get-posts.dto';
+import { PaginationProvider } from 'src/common/pagination/providers/pagination.provider';
+import { Paginated } from 'src/common/pagination/interfaces/paginated.interface';
 
 /**
  * Service responsible for handling operations related to blog posts.
@@ -23,6 +31,7 @@ export class PostsService {
   constructor(
     private readonly usersService: UsersService,
     private readonly tagsService: TagsService,
+    private readonly paginationProvider: PaginationProvider,
     @InjectRepository(Post) private readonly postsRepository: Repository<Post>,
     @InjectRepository(MetaOption)
     private readonly meatOptionsRepository: Repository<MetaOption>,
@@ -51,29 +60,81 @@ export class PostsService {
    * @param {string} userId - The ID of the user whose posts are being retrieved.
    * @returns {Promise<Post[]>} An array of posts, each containing the user information, title, and content.
    */
-  public async findAllPosts(userId: string): Promise<Post[]> {
-    let posts = await this.postsRepository.find();
+  public async findAllPosts(
+    postQuery: GetPostsDto,
+    userId: string,
+  ): Promise<Paginated<Post>> {
+    let posts = await this.paginationProvider.paginateQuery(
+      {
+        limit: postQuery.limit,
+        page: postQuery.page,
+      },
+      this.postsRepository,
+    );
     return posts;
   }
 
   public async updatePostById(patchPostDto: PatchPostDto) {
+    let tags = undefined;
+    let post = undefined;
     // Find the Tags
-    let tags = await this.tagsService.findMultipleTags(patchPostDto.tags)
+    try {
+      tags = await this.tagsService.findMultipleTags(patchPostDto.tags);
+    } catch (error) {
+      throw new RequestTimeoutException(
+        'Unable to process your request at the moment please try later',
+        {
+          description: 'Error connecting to the database',
+        },
+      );
+    }
+
+    if (!tags || tags.length !== patchPostDto.tags.length) {
+      throw new BadGatewayException(
+        'Please check your tag Ids and ensure they are correct',
+      );
+    }
+
     // Find the Post
-    let post = await this.postsRepository.findOneBy({id:patchPostDto.id})
+    try {
+      post = await this.postsRepository.findOneBy({ id: patchPostDto.id });
+    } catch (error) {
+      throw new RequestTimeoutException(
+        'Unable to process your request at the moment please try later',
+        {
+          description: 'Error connecting to the database',
+        },
+      );
+    }
+
+    if (!post) {
+      throw new BadGatewayException('The post Id does not exists');
+    }
+
     // Update the properties of the Post
-    post.title = patchPostDto.title ?? post.title
-    post.content = patchPostDto.content ?? post.content
-    post.slug = patchPostDto.slug ?? post.slug
-    post.status = patchPostDto.status ?? post.status
-    post.schema = patchPostDto.schema ?? post.schema
-    post.postType = patchPostDto.postType ?? post.postType
-    post.featuredImageUrl = patchPostDto.featuredImageUrl ?? post.featuredImageUrl
-    post.publishOn = patchPostDto.publishOn ?? post.publishOn
+    post.title = patchPostDto.title ?? post.title;
+    post.content = patchPostDto.content ?? post.content;
+    post.slug = patchPostDto.slug ?? post.slug;
+    post.status = patchPostDto.status ?? post.status;
+    post.schema = patchPostDto.schema ?? post.schema;
+    post.postType = patchPostDto.postType ?? post.postType;
+    post.featuredImageUrl =
+      patchPostDto.featuredImageUrl ?? post.featuredImageUrl;
+    post.publishOn = patchPostDto.publishOn ?? post.publishOn;
     //  Assign the new tags
-    post.tags = tags
-    // Save the post and return 
-    return await this.postsRepository.save(post);
+    post.tags = tags;
+    // Save the post and return
+    try {
+      await this.postsRepository.save(post);
+    } catch (error) {
+      throw new RequestTimeoutException(
+        'Unable to process your request at the moment please try later',
+        {
+          description: 'Error connecting to the database',
+        },
+      );
+    }
+    return post;
   }
 
   public async delete(id: number) {

@@ -4,8 +4,28 @@ POST http://localhost:3000/users HTTP/1.1
 Content-Type: application/json
 
 {
-    "firstName": "Aryan",
+    "firstName": "Aditya",
     "lastName": "Shinde",
-    "email": "aryanshinde6039@gmail.com",
-    "password":"Aryan@123"
+    "email": "adityashinde6039@gmail.com",
+    "password":"Aditya@123"
+}
+
+POST http://localhost:3000/users/create-many HTTP/1.1
+Content-Type: application/json
+
+{
+    "users": [
+        {
+            "firstName": "John",
+            "lastName": "Doe",
+            "email": "johndoe@gmail.com",
+            "password":"johnDoe@123"
+        },
+        {
+            "firstName": "Mark",
+            "lastName": "Doe",
+            "email": "markdoe@gmail.com",
+            "password":"markDoe@123"
+        }
+    ]
 }
